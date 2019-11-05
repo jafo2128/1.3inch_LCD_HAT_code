@@ -1,9 +1,5 @@
-# USELIB = USE_BCM2835_LIB
-# USELIB = USE_WIRINGPI_LIB
-USELIB = USE_DEV_LIB
-
 CC      = gcc
-CFLAGS  = -g -O2 -Wall -Werror -D$(USELIB)
+CFLAGS  = -g -O2 -Wall -Werror
 
 TARGET  = demo
 OBJ     = DEV_Config.o \
@@ -20,18 +16,10 @@ OBJ     = DEV_Config.o \
           main.o \
           sysfs_gpio.o
 
-ifeq ($(USELIB), USE_BCM2835_LIB)
-    LIB = -lbcm2835 -lm
-else ifeq ($(USELIB), USE_WIRINGPI_LIB)
-    LIB = -lwiringPi -lm -lpthread -lcrypt -lrt
-else
-    LIB =
-endif
-
 all:    $(TARGET)
 
 clean:
 	rm -f *.o $(TARGET)
 
 $(TARGET): $(OBJ)
-	$(CC) $(LDFLAGS) $(OBJ) $(LIB) -o $@
+	$(CC) $(LDFLAGS) $(OBJ) -o $@

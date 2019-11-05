@@ -13,16 +13,8 @@
 #define _DEV_CONFIG_H_
 
 #include "Debug.h"
-
-#ifdef USE_BCM2835_LIB
-    #include <bcm2835.h>
-#elif USE_WIRINGPI_LIB
-    #include <wiringPi.h>
-    #include <wiringPiSPI.h>
-#elif USE_DEV_LIB
-    #include "sysfs_gpio.h"
-    #include "dev_hardware_SPI.h"
-#endif
+#include "sysfs_gpio.h"
+#include "dev_hardware_SPI.h"
 #include <unistd.h>
 
 #include <errno.h>
