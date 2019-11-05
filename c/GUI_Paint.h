@@ -18,7 +18,7 @@
 
 #include "Debug.h"
 #include "LCD_1in3.h"
-#include "../Fonts/fonts.h"
+#include "fonts.h"
 
 /**
  * Display orientation
@@ -167,8 +167,3 @@ void Paint_DrawTime(UWORD Xstart, UWORD Ystart, PAINT_TIME *pTime, sFONT* Font, 
 
 void GUI_Partial_Refresh(UWORD Xstart, UWORD Ystart, UWORD Xend, UWORD Yend);
 #endif
-
-
-
-
-

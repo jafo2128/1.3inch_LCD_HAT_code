@@ -58,16 +58,16 @@ void Paint_NewImage(UWORD *image, UWORD Width, UWORD Height, UWORD Rotate, UWORD
 
     Paint.WidthMemory = Width;
     Paint.HeightMemory = Height;
-    Paint.Color = Color;    
+    Paint.Color = Color;
     Paint.WidthByte = Width;
-    Paint.HeightByte = Height;    
-    Paint.Depth = Depth;    
+    Paint.HeightByte = Height;
+    Paint.Depth = Depth;
 //    printf("WidthByte = %d, HeightByte = %d\r\n", Paint.WidthByte, Paint.HeightByte);
 //    printf(" EPD_WIDTH / 8 = %d\r\n",  122 / 8);
-   
+
     Paint.Rotate = Rotate;
     Paint.Mirror = MIRROR_NONE;
-    
+
     if(Rotate == ROTATE_0 || Rotate == ROTATE_180) {
         Paint.Width = Width;
         Paint.Height = Height;
@@ -109,14 +109,14 @@ parameter:
 ******************************************************************************/
 void Paint_SetMirroring(UBYTE mirror)
 {
-    if(mirror == MIRROR_NONE || mirror == MIRROR_HORIZONTAL || 
+    if(mirror == MIRROR_NONE || mirror == MIRROR_HORIZONTAL ||
         mirror == MIRROR_VERTICAL || mirror == MIRROR_ORIGIN) {
         DEBUG("mirror image x:%s, y:%s\r\n",(mirror & 0x01)? "mirror":"none", ((mirror >> 1) & 0x01)? "mirror":"none");
         Paint.Mirror = mirror;
     } else {
         DEBUG("mirror should be MIRROR_NONE, MIRROR_HORIZONTAL, \
         MIRROR_VERTICAL or MIRROR_ORIGIN\r\n");
-    }    
+    }
 }
 
 /******************************************************************************
@@ -131,13 +131,13 @@ void Paint_SetPixel(UWORD Xpoint, UWORD Ypoint, UWORD Color)
     if(Xpoint > Paint.Width || Ypoint > Paint.Height){
         DEBUG("Exceeding display boundaries\r\n");
         return;
-    }      
+    }
     UWORD X, Y;
 
     switch(Paint.Rotate) {
     case 0:
         X = Xpoint;
-        Y = Ypoint;  
+        Y = Ypoint;
         break;
     case 90:
         X = Paint.WidthMemory - Ypoint - 1;
@@ -154,7 +154,7 @@ void Paint_SetPixel(UWORD Xpoint, UWORD Ypoint, UWORD Color)
     default:
         return;
     }
-    
+
     switch(Paint.Mirror) {
     case MIRROR_NONE:
         break;
@@ -176,8 +176,8 @@ void Paint_SetPixel(UWORD Xpoint, UWORD Ypoint, UWORD Color)
         DEBUG("Exceeding display boundaries\r\n");
         return;
     }
-    
-    
+
+
     if(Paint.Depth == 1){
         UDOUBLE Addr = X / 8 + Y * Paint.WidthByte;
         UBYTE Rdata = Paint.Image[Addr];
@@ -707,7 +707,7 @@ void Paint_DrawBitMap(const unsigned char* image_buffer)
 
 void GUI_Partial_Refresh(UWORD Xstart, UWORD Ystart, UWORD Xend, UWORD Yend)
 {
-    UWORD X0, Y0, X1, Y1;
+    UWORD X0 = 0, Y0 = 0, X1 = 0, Y1 = 0;
     switch(Paint.Rotate) {
     case 0:
         X0 = Xstart;
@@ -736,4 +736,3 @@ void GUI_Partial_Refresh(UWORD Xstart, UWORD Ystart, UWORD Xend, UWORD Yend)
     }
     LCD_1in3_DisplayWindows(X0, Y0, X1, Y1, Paint.Image);
 }
-
