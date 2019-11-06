@@ -12,8 +12,8 @@
 #ifndef _DEV_CONFIG_H_
 #define _DEV_CONFIG_H_
 
-#include "sysfs_gpio.h"
-#include "dev_hardware_SPI.h"
+#include "gpio.h"
+#include "spi.h"
 #include <unistd.h>
 
 #include <errno.h>

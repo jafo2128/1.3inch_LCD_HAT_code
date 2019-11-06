@@ -11,15 +11,21 @@
 * | Info        :   Basic version
 *
 ******************************************************************************/
-#include "GUI_BMP.h"
 #include <stdio.h>	//fseek fread
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdint.h>
 #include <stdlib.h>	//memset
 
-#include "GUI_Paint.h"
-// #include "GUI_Cache.h"
+#include "bmp.h"
+#include "paint.h"
+
+#define USE_DEBUG 1
+#if USE_DEBUG
+    #define DEBUG(__info, ...) printf("Debug : " __info, ##__VA_ARGS__)
+#else
+    #define DEBUG(__info, ...)
+#endif
 
 UBYTE GUI_ReadBmp(const char *path)
 {

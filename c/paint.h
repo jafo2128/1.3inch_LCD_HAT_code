@@ -16,8 +16,7 @@
 #ifndef __GUI_PAINT_H
 #define __GUI_PAINT_H
 
-#include "Debug.h"
-#include "LCD_1in3.h"
+#include "lcd.h"
 #include "fonts.h"
 
 /**

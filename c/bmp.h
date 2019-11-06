@@ -3,7 +3,7 @@
 * | Author      :   Waveshare team
 * | Function    :   Hardware underlying interface
 * | Info        :
-*                Used to shield the underlying layers of each master 
+*                Used to shield the underlying layers of each master
 *                and enhance portability
 *----------------
 * |	This version:   V1.0
@@ -19,7 +19,7 @@
 #include <unistd.h>
 #include <stdint.h>
 
-#include "GUI_Paint.h"
+#include "paint.h"
 
 #define  RGB(r,g,b)         (((r>>3)<<11)|((g>>2)<<5)|(b>>3))
 

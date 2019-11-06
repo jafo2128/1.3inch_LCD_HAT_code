@@ -28,7 +28,7 @@
 # THE SOFTWARE.
 #
 ******************************************************************************/
-#include "sysfs_gpio.h"
+#include "gpio.h"
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>

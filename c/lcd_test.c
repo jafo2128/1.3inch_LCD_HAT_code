@@ -1,9 +1,8 @@
-#include "DEV_Config.h"
-#include "LCD_1in3.h"
-#include "GUI_Paint.h"
-#include "GUI_BMP.h"
-#include <stdio.h>		//printf()
-#include <stdlib.h>		//exit()
+#include "dev.h"
+#include "lcd.h"
+#include "paint.h"
+#include <stdio.h>	//printf()
+#include <stdlib.h>	//exit()
 #include <signal.h>     //signal()
 
 int main()
@@ -61,18 +60,10 @@ int main()
 
     // /*3.Refresh the picture in RAM to LCD*/
     LCD_1in3_Display(BlackImage);
-    DEV_Delay_ms(2000);
-
-    // show bmp
-    printf("show bmp\r\n");
-    GUI_ReadBmp("./pic.bmp");
-
-    LCD_1in3_Display(BlackImage);
-    DEV_Delay_ms(2000);
 
     /* Module Exit */
     free(BlackImage);
     BlackImage = NULL;
-	DEV_ModuleExit();
+    DEV_ModuleExit();
     return 0;
 }

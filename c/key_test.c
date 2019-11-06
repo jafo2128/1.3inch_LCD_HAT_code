@@ -1,7 +1,7 @@
-#include "DEV_Config.h"
-#include "LCD_1in3.h"
-#include "GUI_Paint.h"
-#include "GUI_BMP.h"
+#include "dev.h"
+#include "lcd.h"
+#include "paint.h"
+#include "bmp.h"
 #include <stdio.h>		//printf()
 #include <stdlib.h>		//exit()
 #include <signal.h>     //signal()

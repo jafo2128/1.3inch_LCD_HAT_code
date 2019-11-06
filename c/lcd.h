@@ -14,7 +14,7 @@
 #ifndef __LCD_1IN3_H
 #define __LCD_1IN3_H
 
-#include "DEV_Config.h"
+#include "dev.h"
 #include <stdint.h>
 
 #include <stdlib.h>		//itoa()

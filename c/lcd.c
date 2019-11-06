@@ -11,14 +11,12 @@
 * | Info        :   Basic version
 *
 ******************************************************************************/
-#include "LCD_1in3.h"
-#include "DEV_Config.h"
-
+#include "lcd.h"
+#include "dev.h"
 #include <stdlib.h>		//itoa()
 #include <stdio.h>
 
 LCD_ATTRIBUTES LCD;
-
 
 /******************************************************************************
 function :	Hardware reset
@@ -96,7 +94,7 @@ static void LCD_InitReg(void)
     LCD_SendCommand(0xBB);  //VCOM Setting
     LCD_SendData_8Bit(0x19);
 
-    LCD_SendCommand(0xC0); //LCM Control     
+    LCD_SendCommand(0xC0); //LCM Control
     LCD_SendData_8Bit(0x2C);
 
     LCD_SendCommand(0xC2);  //VDV and VRH Command Enable
@@ -108,7 +106,7 @@ static void LCD_InitReg(void)
 
     LCD_SendCommand(0xC6);  //Frame Rate Control in Normal Mode
     LCD_SendData_8Bit(0x0F);
-    
+
     LCD_SendCommand(0xD0);  // Power Control 1
     LCD_SendData_8Bit(0xA4);
     LCD_SendData_8Bit(0xA1);
@@ -193,7 +191,7 @@ void LCD_1in3_Init(UBYTE Scan_dir)
 
     //Set the resolution and scanning method of the screen
     LCD_SetAttributes(Scan_dir);
-    
+
     //Set the initialization register
     LCD_InitReg();
 }
@@ -233,13 +231,13 @@ void LCD_1in3_Clear(UWORD Color)
 {
     UWORD j;
     UWORD Image[LCD_WIDTH*LCD_HEIGHT];
-    
+
     Color = ((Color<<8)&0xff00)|(Color>>8);
-   
+
     for (j = 0; j < LCD_HEIGHT*LCD_WIDTH; j++) {
         Image[j] = Color;
     }
-    
+
     LCD_1in3_SetWindows(0, 0, LCD_WIDTH, LCD_HEIGHT);
     LCD_DC_1;
     for(j = 0; j < LCD_HEIGHT; j++){
@@ -284,7 +282,7 @@ void LCD_1in3_DisplayPoint(UWORD X, UWORD Y, UWORD Color)
 void  Handler_1in3_LCD(int signo)
 {
     //System Exit
-    printf("\r\nHandler:Program stop\r\n");     
+    printf("\r\nHandler:Program stop\r\n");
     DEV_ModuleExit();
     exit(0);
 }
