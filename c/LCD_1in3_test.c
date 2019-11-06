@@ -2,31 +2,31 @@
 #include "LCD_1in3.h"
 #include "GUI_Paint.h"
 #include "GUI_BMP.h"
-#include "test.h"
 #include <stdio.h>		//printf()
 #include <stdlib.h>		//exit()
 #include <signal.h>     //signal()
 
-void LCD_1in3_test(void)
+int main()
 {
     // Exception handling:ctrl + c
     signal(SIGINT, Handler_1in3_LCD);
-    
+
     /* Module Init */
-	if(DEV_ModuleInit() != 0){
+    if(DEV_ModuleInit() != 0){
         DEV_ModuleExit();
         exit(0);
     }
-	
+
     /* LCD Init */
-	printf("1.3inch LCD demo...\r\n");
-	LCD_1in3_Init(HORIZONTAL);
-	LCD_1in3_Clear(WHITE);
-    
+    printf("1.3inch LCD demo...\r\n");
+    LCD_1in3_Init(HORIZONTAL);
+    LCD_1in3_Clear(WHITE);
+
     UWORD *BlackImage;
     UDOUBLE Imagesize = LCD_HEIGHT*LCD_WIDTH*2;
     printf("Imagesize = %d\r\n", Imagesize);
-    if((BlackImage = (UWORD *)malloc(Imagesize)) == NULL) {
+    BlackImage = (UWORD*) malloc(Imagesize);
+    if (!BlackImage) {
         printf("Failed to apply for black memory...\r\n");
         exit(0);
     }
@@ -58,21 +58,21 @@ void LCD_1in3_test(void)
     Paint_DrawString_EN(5, 90, "waveshare", &Font20, RED, IMAGE_BACKGROUND);
 
     // Paint_DrawNum(20, 200, 123456789, &Font20, BLUE, IMAGE_BACKGROUND);
-        
+
     // /*3.Refresh the picture in RAM to LCD*/
     LCD_1in3_Display(BlackImage);
     DEV_Delay_ms(2000);
-    
-    // /* show bmp */
-	printf("show bmp\r\n");
-	GUI_ReadBmp("./pic/pic.bmp");
-    
+
+    // show bmp
+    printf("show bmp\r\n");
+    GUI_ReadBmp("./pic.bmp");
+
     LCD_1in3_Display(BlackImage);
     DEV_Delay_ms(2000);
-    
+
     /* Module Exit */
     free(BlackImage);
     BlackImage = NULL;
 	DEV_ModuleExit();
+    return 0;
 }
-

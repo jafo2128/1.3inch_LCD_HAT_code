@@ -12,7 +12,6 @@
 #ifndef _DEV_CONFIG_H_
 #define _DEV_CONFIG_H_
 
-#include "Debug.h"
 #include "sysfs_gpio.h"
 #include "dev_hardware_SPI.h"
 #include <unistd.h>
@@ -34,20 +33,18 @@
 #define LCD_DC   25
 #define LCD_BL   24
 
-
-
 //LCD
-#define LCD_CS_0		DEV_Digital_Write(LCD_CS,0)
-#define LCD_CS_1		DEV_Digital_Write(LCD_CS,1)
+#define LCD_CS_0	DEV_Digital_Write(LCD_CS, 0)
+#define LCD_CS_1	DEV_Digital_Write(LCD_CS, 1)
 
-#define LCD_RST_0		DEV_Digital_Write(LCD_RST,0)
-#define LCD_RST_1		DEV_Digital_Write(LCD_RST,1)
+#define LCD_RST_0	DEV_Digital_Write(LCD_RST, 0)
+#define LCD_RST_1	DEV_Digital_Write(LCD_RST, 1)
 
-#define LCD_DC_0		DEV_Digital_Write(LCD_DC,0)
-#define LCD_DC_1		DEV_Digital_Write(LCD_DC,1)
+#define LCD_DC_0	DEV_Digital_Write(LCD_DC, 0)
+#define LCD_DC_1	DEV_Digital_Write(LCD_DC, 1)
 
-#define LCD_BL_0		DEV_Digital_Write(LCD_BL,0)
-#define LCD_BL_1		DEV_Digital_Write(LCD_BL,1)
+#define LCD_BL_0	DEV_Digital_Write(LCD_BL, 0)
+#define LCD_BL_1	DEV_Digital_Write(LCD_BL, 1)
 
 #define KEY_UP_PIN      6
 #define KEY_DOWN_PIN    19
