@@ -55,7 +55,9 @@ int GPIO_Export(int Pin)
 
     len = snprintf(buffer, NUM_MAXBUF, "%d", Pin);
     if (write(fd, buffer, len) != len) {
-        perror(__func__);
+        // EBUSY - already exported.
+        //perror(__func__);
+        close(fd);
         return -1;
     }
 
@@ -80,6 +82,7 @@ int GPIO_Unexport(int Pin)
     len = snprintf(buffer, NUM_MAXBUF, "%d", Pin);
     if (write(fd, buffer, len) != len) {
         perror(__func__);
+        close(fd);
         return -1;
     }
 
