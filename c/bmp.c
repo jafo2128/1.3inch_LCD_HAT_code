@@ -11,12 +11,7 @@
 * | Info        :   Basic version
 *
 ******************************************************************************/
-#include <stdio.h>	//fseek fread
-#include <fcntl.h>
-#include <unistd.h>
-#include <stdint.h>
-#include <stdlib.h>	//memset
-
+#include <stdio.h>
 #include "bmp.h"
 #include "paint.h"
 
@@ -27,7 +22,7 @@
     #define DEBUG(__info, ...)
 #endif
 
-UBYTE GUI_ReadBmp(const char *path)
+int BMP_LoadFile(const char *path)
 {
     FILE *fp;                     //Define a file pointer
     BMPFILEHEADER bmpFileHeader;  //Define a bmp file header structure
@@ -53,13 +48,13 @@ UBYTE GUI_ReadBmp(const char *path)
         return 0;
     }
 
-	int row, col;
+    int row, col;
     short data;
-	RGBQUAD rgb;
-	int len = bmpInfoHeader.bBitCount / 8;    //RGB888,one 3 byte = 1 bitbmp
+    RGBQUAD rgb;
+    int len = bmpInfoHeader.bBitCount / 8;    //RGB888,one 3 byte = 1 bitbmp
 
-	// get bmp data and show
-	fseek(fp, bmpFileHeader.bOffset, SEEK_SET);
+    // get bmp data and show
+    fseek(fp, bmpFileHeader.bOffset, SEEK_SET);
     for(row = 0; row < bmpInfoHeader.bHeight; row++) {
         for(col = 0; col < bmpInfoHeader.bWidth; col++) {
 			if(fread((char *)&rgb, 1, len, fp) != len){
@@ -71,6 +66,6 @@ UBYTE GUI_ReadBmp(const char *path)
             Paint_SetPixel(col, bmpInfoHeader.bHeight - row - 1, data);
         }
     }
-	fclose(fp);
+    fclose(fp);
     return 0;
 }

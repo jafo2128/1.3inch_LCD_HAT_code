@@ -14,30 +14,28 @@
 #ifndef __LCD_1IN3_H
 #define __LCD_1IN3_H
 
-#include "dev.h"
 #include <stdint.h>
 
-#include <stdlib.h>		//itoa()
-#include <stdio.h>
+#define LCD_HEIGHT  240
+#define LCD_WIDTH   240
 
-#define LCD_HEIGHT 240
-#define LCD_WIDTH 240
-
-#define HORIZONTAL 0
-#define VERTICAL   1
+#define HORIZONTAL  0
+#define VERTICAL    1
 
 typedef struct {
-    UWORD WIDTH;
-    UWORD HEIGHT;
-    UBYTE SCAN_DIR;
+    uint16_t WIDTH;
+    uint16_t HEIGHT;
+    uint8_t SCAN_DIR;
 } LCD_ATTRIBUTES;
 
 extern LCD_ATTRIBUTES LCD;
 
-void LCD_1in3_Init(UBYTE Scan_dir);
-void LCD_1in3_Clear(UWORD Color);
-void LCD_1in3_Display(UWORD *Image);
-void LCD_1in3_DisplayWindows(UWORD Xstart, UWORD Ystart, UWORD Xend, UWORD Yend, UWORD *Image);
-void LCD_1in3_DisplayPoint(UWORD X, UWORD Y, UWORD Color);
-void Handler_1in3_LCD(int signo);
+void LCD_Start(uint8_t orientation);
+void LCD_Clear(uint16_t Color);
+void LCD_Display(uint16_t *Image);
+void LCD_DisplayWindows(uint16_t Xstart, uint16_t Ystart, uint16_t Xend, uint16_t Yend, uint16_t *Image);
+void LCD_DisplayPoint(uint16_t X, uint16_t Y, uint16_t Color);
+void LCD_Terminate(int signo);
+void LCD_Init(void);
+void LCD_Exit(void);
 #endif

@@ -1,5 +1,5 @@
 /*****************************************************************************
-* | File      	:   LCD_1in3.c
+* | File      	:   LCD.c
 * | Author      :   Waveshare team
 * | Function    :   Hardware underlying interface
 * | Info        :
@@ -11,10 +11,13 @@
 * | Info        :   Basic version
 *
 ******************************************************************************/
-#include "lcd.h"
-#include "dev.h"
-#include <stdlib.h>		//itoa()
+#include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
+#include "lcd.h"
+#include "pins.h"
+#include "gpio.h"
+#include "spi.h"
 
 LCD_ATTRIBUTES LCD;
 
@@ -24,12 +27,12 @@ parameter:
 ******************************************************************************/
 static void LCD_Reset(void)
 {
-    LCD_RST_1;
-    DEV_Delay_ms(100);
-    LCD_RST_0;
-    DEV_Delay_ms(100);
-    LCD_RST_1;
-    DEV_Delay_ms(100);
+    GPIO_Write(LCD_RST, 1);
+    usleep(100000);
+    GPIO_Write(LCD_RST, 0);
+    usleep(100000);
+    GPIO_Write(LCD_RST, 1);
+    usleep(100000);
 }
 
 /******************************************************************************
@@ -37,12 +40,12 @@ function :	send command
 parameter:
      Reg : Command register
 ******************************************************************************/
-static void LCD_SendCommand(UBYTE Reg)
+static void LCD_SendCommand(uint8_t Reg)
 {
-    LCD_DC_0;
-    // LCD_CS_0;
-    DEV_SPI_WriteByte(Reg);
-    // LCD_CS_1;
+    GPIO_Write(LCD_DC, 0);
+    // GPIO_Write(LCD_CS, 0);
+    SPI_TransferByte(Reg);
+    // GPIO_Write(LCD_CS, 1);
 }
 
 /******************************************************************************
@@ -50,12 +53,12 @@ function :	send data
 parameter:
     Data : Write data
 ******************************************************************************/
-static void LCD_SendData_8Bit(UBYTE Data)
+static void LCD_SendByte(uint8_t Data)
 {
-    LCD_DC_1;
-    // LCD_CS_0;
-    DEV_SPI_WriteByte(Data);
-    // LCD_CS_1;
+    GPIO_Write(LCD_DC, 1);
+    // GPIO_Write(LCD_CS, 0);
+    SPI_TransferByte(Data);
+    // GPIO_Write(LCD_CS, 1);
 }
 
 /******************************************************************************
@@ -63,13 +66,13 @@ function :	send data
 parameter:
     Data : Write data
 ******************************************************************************/
-static void LCD_SendData_16Bit(UWORD Data)
+static void LCD_SendWord(uint16_t Data)
 {
-    LCD_DC_1;
-    // LCD_CS_0;
-    DEV_SPI_WriteByte((Data >> 8) & 0xFF);
-    DEV_SPI_WriteByte(Data & 0xFF);
-    // LCD_CS_1;
+    GPIO_Write(LCD_DC, 1);
+    // GPIO_Write(LCD_CS, 0);
+    SPI_TransferByte((Data >> 8) & 0xFF);
+    SPI_TransferByte(Data & 0xFF);
+    // GPIO_Write(LCD_CS, 1);
 }
 
 /******************************************************************************
@@ -79,69 +82,69 @@ parameter:
 static void LCD_InitReg(void)
 {
     LCD_SendCommand(0x3A);
-    LCD_SendData_8Bit(0x05);
+    LCD_SendByte(0x05);
 
     LCD_SendCommand(0xB2);
-    LCD_SendData_8Bit(0x0C);
-    LCD_SendData_8Bit(0x0C);
-    LCD_SendData_8Bit(0x00);
-    LCD_SendData_8Bit(0x33);
-    LCD_SendData_8Bit(0x33);
+    LCD_SendByte(0x0C);
+    LCD_SendByte(0x0C);
+    LCD_SendByte(0x00);
+    LCD_SendByte(0x33);
+    LCD_SendByte(0x33);
 
     LCD_SendCommand(0xB7);  //Gate Control
-    LCD_SendData_8Bit(0x35);
+    LCD_SendByte(0x35);
 
     LCD_SendCommand(0xBB);  //VCOM Setting
-    LCD_SendData_8Bit(0x19);
+    LCD_SendByte(0x19);
 
     LCD_SendCommand(0xC0); //LCM Control
-    LCD_SendData_8Bit(0x2C);
+    LCD_SendByte(0x2C);
 
     LCD_SendCommand(0xC2);  //VDV and VRH Command Enable
-    LCD_SendData_8Bit(0x01);
+    LCD_SendByte(0x01);
     LCD_SendCommand(0xC3);  //VRH Set
-    LCD_SendData_8Bit(0x12);
+    LCD_SendByte(0x12);
     LCD_SendCommand(0xC4);  //VDV Set
-    LCD_SendData_8Bit(0x20);
+    LCD_SendByte(0x20);
 
     LCD_SendCommand(0xC6);  //Frame Rate Control in Normal Mode
-    LCD_SendData_8Bit(0x0F);
+    LCD_SendByte(0x0F);
 
     LCD_SendCommand(0xD0);  // Power Control 1
-    LCD_SendData_8Bit(0xA4);
-    LCD_SendData_8Bit(0xA1);
+    LCD_SendByte(0xA4);
+    LCD_SendByte(0xA1);
 
     LCD_SendCommand(0xE0);  //Positive Voltage Gamma Control
-    LCD_SendData_8Bit(0xD0);
-    LCD_SendData_8Bit(0x04);
-    LCD_SendData_8Bit(0x0D);
-    LCD_SendData_8Bit(0x11);
-    LCD_SendData_8Bit(0x13);
-    LCD_SendData_8Bit(0x2B);
-    LCD_SendData_8Bit(0x3F);
-    LCD_SendData_8Bit(0x54);
-    LCD_SendData_8Bit(0x4C);
-    LCD_SendData_8Bit(0x18);
-    LCD_SendData_8Bit(0x0D);
-    LCD_SendData_8Bit(0x0B);
-    LCD_SendData_8Bit(0x1F);
-    LCD_SendData_8Bit(0x23);
+    LCD_SendByte(0xD0);
+    LCD_SendByte(0x04);
+    LCD_SendByte(0x0D);
+    LCD_SendByte(0x11);
+    LCD_SendByte(0x13);
+    LCD_SendByte(0x2B);
+    LCD_SendByte(0x3F);
+    LCD_SendByte(0x54);
+    LCD_SendByte(0x4C);
+    LCD_SendByte(0x18);
+    LCD_SendByte(0x0D);
+    LCD_SendByte(0x0B);
+    LCD_SendByte(0x1F);
+    LCD_SendByte(0x23);
 
     LCD_SendCommand(0xE1);  //Negative Voltage Gamma Control
-    LCD_SendData_8Bit(0xD0);
-    LCD_SendData_8Bit(0x04);
-    LCD_SendData_8Bit(0x0C);
-    LCD_SendData_8Bit(0x11);
-    LCD_SendData_8Bit(0x13);
-    LCD_SendData_8Bit(0x2C);
-    LCD_SendData_8Bit(0x3F);
-    LCD_SendData_8Bit(0x44);
-    LCD_SendData_8Bit(0x51);
-    LCD_SendData_8Bit(0x2F);
-    LCD_SendData_8Bit(0x1F);
-    LCD_SendData_8Bit(0x1F);
-    LCD_SendData_8Bit(0x20);
-    LCD_SendData_8Bit(0x23);
+    LCD_SendByte(0xD0);
+    LCD_SendByte(0x04);
+    LCD_SendByte(0x0C);
+    LCD_SendByte(0x11);
+    LCD_SendByte(0x13);
+    LCD_SendByte(0x2C);
+    LCD_SendByte(0x3F);
+    LCD_SendByte(0x44);
+    LCD_SendByte(0x51);
+    LCD_SendByte(0x2F);
+    LCD_SendByte(0x1F);
+    LCD_SendByte(0x1F);
+    LCD_SendByte(0x20);
+    LCD_SendByte(0x23);
 
     LCD_SendCommand(0x21);  //Display Inversion On
 
@@ -155,11 +158,11 @@ function:	Set the resolution and scanning method of the screen
 parameter:
 		Scan_dir:   Scan direction
 ********************************************************************************/
-static void LCD_SetAttributes(UBYTE Scan_dir)
+static void LCD_SetAttributes(uint8_t Scan_dir)
 {
     //Get the screen scan direction
     LCD.SCAN_DIR = Scan_dir;
-    UBYTE MemoryAccessReg = 0x00;
+    uint8_t MemoryAccessReg = 0x00;
 
     //Get GRAM and LCD width and height
     if(Scan_dir == HORIZONTAL) {
@@ -174,23 +177,23 @@ static void LCD_SetAttributes(UBYTE Scan_dir)
 
     // Set the read / write scan direction of the frame memory
     LCD_SendCommand(0x36); //MX, MY, RGB mode
-    LCD_SendData_8Bit(MemoryAccessReg);	//0x08 set RGB
+    LCD_SendByte(MemoryAccessReg);	//0x08 set RGB
 }
 
 /********************************************************************************
 function :	Initialize the lcd
 parameter:
 ********************************************************************************/
-void LCD_1in3_Init(UBYTE Scan_dir)
+void LCD_Start(uint8_t orientation)
 {
     //Turn on the backlight
-    LCD_BL_1;
+    GPIO_Write(LCD_BL, 1);
 
     //Hardware reset
     LCD_Reset();
 
     //Set the resolution and scanning method of the screen
-    LCD_SetAttributes(Scan_dir);
+    LCD_SetAttributes(orientation);
 
     //Set the initialization register
     LCD_InitReg();
@@ -204,21 +207,21 @@ parameter:
 		Xend    :   X direction end coordinates
 		Yend    :   Y direction end coordinates
 ********************************************************************************/
-void LCD_1in3_SetWindows(UWORD Xstart, UWORD Ystart, UWORD Xend, UWORD Yend)
+void LCD_SetWindows(uint16_t Xstart, uint16_t Ystart, uint16_t Xend, uint16_t Yend)
 {
     //set the X coordinates
     LCD_SendCommand(0x2A);
-    LCD_SendData_8Bit((Xstart >> 8) & 0xFF);
-    LCD_SendData_8Bit(Xstart & 0xFF);
-    LCD_SendData_8Bit(((Xend  - 1) >> 8) & 0xFF);
-    LCD_SendData_8Bit((Xend  - 1) & 0xFF);
+    LCD_SendByte((Xstart >> 8) & 0xFF);
+    LCD_SendByte(Xstart & 0xFF);
+    LCD_SendByte(((Xend  - 1) >> 8) & 0xFF);
+    LCD_SendByte((Xend  - 1) & 0xFF);
 
     //set the Y coordinates
     LCD_SendCommand(0x2B);
-    LCD_SendData_8Bit((Ystart >> 8) & 0xFF);
-    LCD_SendData_8Bit(Ystart & 0xFF);
-    LCD_SendData_8Bit(((Yend  - 1) >> 8) & 0xFF);
-    LCD_SendData_8Bit((Yend  - 1) & 0xFF);
+    LCD_SendByte((Ystart >> 8) & 0xFF);
+    LCD_SendByte(Ystart & 0xFF);
+    LCD_SendByte(((Yend  - 1) >> 8) & 0xFF);
+    LCD_SendByte((Yend  - 1) & 0xFF);
 
     LCD_SendCommand(0X2C);
 }
@@ -227,10 +230,10 @@ void LCD_1in3_SetWindows(UWORD Xstart, UWORD Ystart, UWORD Xend, UWORD Yend)
 function :	Clear screen
 parameter:
 ******************************************************************************/
-void LCD_1in3_Clear(UWORD Color)
+void LCD_Clear(uint16_t Color)
 {
-    UWORD j;
-    UWORD Image[LCD_WIDTH*LCD_HEIGHT];
+    uint16_t j;
+    uint16_t Image[LCD_WIDTH*LCD_HEIGHT];
 
     Color = ((Color<<8)&0xff00)|(Color>>8);
 
@@ -238,10 +241,10 @@ void LCD_1in3_Clear(UWORD Color)
         Image[j] = Color;
     }
 
-    LCD_1in3_SetWindows(0, 0, LCD_WIDTH, LCD_HEIGHT);
-    LCD_DC_1;
+    LCD_SetWindows(0, 0, LCD_WIDTH, LCD_HEIGHT);
+    GPIO_Write(LCD_DC, 1);
     for(j = 0; j < LCD_HEIGHT; j++){
-        DEV_SPI_Write_nByte((uint8_t *)&Image[j*LCD_WIDTH], LCD_WIDTH*2);
+        SPI_Transfer((uint8_t *)&Image[j*LCD_WIDTH], LCD_WIDTH*2);
     }
 }
 
@@ -249,40 +252,83 @@ void LCD_1in3_Clear(UWORD Color)
 function :	Sends the image buffer in RAM to displays
 parameter:
 ******************************************************************************/
-void LCD_1in3_Display(UWORD *Image)
+void LCD_Display(uint16_t *Image)
 {
-    UWORD j;
-    LCD_1in3_SetWindows(0, 0, LCD_WIDTH, LCD_HEIGHT);
-    LCD_DC_1;
+    uint16_t j;
+    LCD_SetWindows(0, 0, LCD_WIDTH, LCD_HEIGHT);
+    GPIO_Write(LCD_DC, 1);
     for (j = 0; j < LCD_HEIGHT; j++) {
-        DEV_SPI_Write_nByte((uint8_t *)&Image[j*LCD_WIDTH], LCD_WIDTH*2);
+        SPI_Transfer((uint8_t *)&Image[j*LCD_WIDTH], LCD_WIDTH*2);
     }
 }
 
-void LCD_1in3_DisplayWindows(UWORD Xstart, UWORD Ystart, UWORD Xend, UWORD Yend, UWORD *Image)
+void LCD_DisplayWindows(uint16_t Xstart, uint16_t Ystart, uint16_t Xend, uint16_t Yend, uint16_t *Image)
 {
     // display
-    UDOUBLE Addr = 0;
+    uint32_t Addr = 0;
 
-    UWORD j;
-    LCD_1in3_SetWindows(Xstart, Ystart, Xend-1 , Yend-1);
-    LCD_DC_1;
+    uint16_t j;
+    LCD_SetWindows(Xstart, Ystart, Xend-1 , Yend-1);
+    GPIO_Write(LCD_DC, 1);
     for (j = Ystart; j < Yend - 1; j++) {
         Addr = Xstart + j * LCD_WIDTH ;
-        DEV_SPI_Write_nByte((uint8_t *)&Image[Addr], (Xend-Xstart-1)*2);
+        SPI_Transfer((uint8_t *)&Image[Addr], (Xend-Xstart-1)*2);
     }
 }
 
-void LCD_1in3_DisplayPoint(UWORD X, UWORD Y, UWORD Color)
+void LCD_DisplayPoint(uint16_t X, uint16_t Y, uint16_t Color)
 {
-    LCD_1in3_SetWindows(X,Y,X,Y);
-    LCD_SendData_16Bit(Color);
+    LCD_SetWindows(X,Y,X,Y);
+    LCD_SendWord(Color);
 }
 
-void  Handler_1in3_LCD(int signo)
+void LCD_Terminate(int signo)
 {
-    //System Exit
+    // System Exit
     printf("\r\nHandler:Program stop\r\n");
-    DEV_ModuleExit();
+    LCD_Exit();
     exit(0);
+}
+
+static void LCD_Pin_Mode(uint16_t Pin, uint16_t Mode)
+{
+    GPIO_Export(Pin);
+    if(Mode == 0 || Mode == GPIO_IN){
+        GPIO_Direction(Pin, GPIO_IN);
+        // printf("IN Pin = %d\r\n",Pin);
+    }else{
+        GPIO_Direction(Pin, GPIO_OUT);
+        // printf("OUT Pin = %d\r\n",Pin);
+    }
+}
+
+/*
+ * Initialize the pins and SPI protocol.
+ */
+void LCD_Init(void)
+{
+    LCD_Pin_Mode(LCD_CS, 1);
+    LCD_Pin_Mode(LCD_RST, 1);
+    LCD_Pin_Mode(LCD_DC, 1);
+    LCD_Pin_Mode(LCD_BL, 1);
+
+    LCD_Pin_Mode(KEY_UP_PIN, 0);
+    LCD_Pin_Mode(KEY_DOWN_PIN, 0);
+    LCD_Pin_Mode(KEY_LEFT_PIN, 0);
+    LCD_Pin_Mode(KEY_RIGHT_PIN, 0);
+    LCD_Pin_Mode(KEY_PRESS_PIN, 0);
+    LCD_Pin_Mode(KEY1_PIN, 0);
+    LCD_Pin_Mode(KEY2_PIN, 0);
+    LCD_Pin_Mode(KEY3_PIN, 0);
+    GPIO_Write(LCD_CS, 1);
+
+    SPI_begin("/dev/spidev0.0");
+}
+
+/*
+ * Close SPI connection.
+ */
+void LCD_Exit(void)
+{
+    SPI_end();
 }
