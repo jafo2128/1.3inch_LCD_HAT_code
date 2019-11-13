@@ -1,0 +1,4 @@
+lcd_test
+bmp_test
+key_test
+*.o
