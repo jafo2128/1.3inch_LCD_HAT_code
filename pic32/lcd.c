@@ -289,7 +289,7 @@ static void lcd_setup_gpio_spi()
     //
     // Open the SPI port.
     //
-    spi_init("/dev/spidev2.0", 20000000);
+    spi_init("/dev/spidev2.0", 10000000);
 }
 
 //
@@ -384,4 +384,39 @@ void lcd_rect(int color, int x0, int y0, int x1, int y1)
     lcd_fill(color, x0, y1, x1, y1);
     lcd_fill(color, x0, y0, x0, y1);
     lcd_fill(color, x1, y0, x1, y1);
+}
+
+//
+// Draw a circle.
+//
+void lcd_circle(int color, int x0, int y0, int radius)
+{
+    int f = 1 - radius;
+    int ddF_x = 0;
+    int ddF_y = -2 * radius;
+    int x = 0;
+    int y = radius;
+
+    lcd_pixel(color, x0, y0 + radius);
+    lcd_pixel(color, x0, y0 - radius);
+    lcd_pixel(color, x0 + radius, y0);
+    lcd_pixel(color, x0 - radius, y0);
+    while (x < y) {
+        if (f >= 0) {
+            y--;
+            ddF_y += 2;
+            f += ddF_y;
+        }
+        x++;
+        ddF_x += 2;
+        f += ddF_x + 1;
+        lcd_pixel(color, x0 + x, y0 + y);
+        lcd_pixel(color, x0 - x, y0 + y);
+        lcd_pixel(color, x0 + x, y0 - y);
+        lcd_pixel(color, x0 - x, y0 - y);
+        lcd_pixel(color, x0 + y, y0 + x);
+        lcd_pixel(color, x0 - y, y0 + x);
+        lcd_pixel(color, x0 + y, y0 - x);
+        lcd_pixel(color, x0 - y, y0 - x);
+    }
 }
