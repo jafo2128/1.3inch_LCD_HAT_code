@@ -59,7 +59,7 @@ void lcd_close(void);
 //
 // Clear screen
 //
-void lcd_clear(unsigned color);
+void lcd_clear(int color);
 
 void lcd_pixel(int color, int x, int y);
 void lcd_line(int color, int x0, int y0, int x1, int y1);

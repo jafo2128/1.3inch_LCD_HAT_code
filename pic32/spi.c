@@ -135,13 +135,13 @@ int spi_transfer(uint8_t send)
 }
 
 //
-// Send/receive an array of bytes.
+// Send an array of bytes.
 //
-int spi_bulk_rw(uint8_t *buf, uint32_t len)
+int spi_bulk_write(uint8_t *buf, uint32_t len)
 {
     ioc.len = len;
     ioc.tx_buf = (unsigned long)buf;
-    ioc.rx_buf = (unsigned long)buf;
+    ioc.rx_buf = 0;
 
     if (ioctl(hw_fd, SPI_IOC_MESSAGE(1), &ioc) < 0) {
         return -1;

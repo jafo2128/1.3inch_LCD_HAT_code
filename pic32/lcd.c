@@ -59,11 +59,11 @@ static int lcd_width, lcd_height;
 static void lcd_reset()
 {
     gpio_write(PIN_LCD_RST, 1);
-    usleep(100000);
+    usleep(10000);
     gpio_write(PIN_LCD_RST, 0);
-    usleep(100000);
+    usleep(10000);
     gpio_write(PIN_LCD_RST, 1);
-    usleep(100000);
+    usleep(10000);
 }
 
 //
@@ -212,24 +212,32 @@ void lcd_pixel(int color, int x, int y)
 }
 
 //
-// Clear screen
+// Clear screen.
 //
-void lcd_clear(unsigned color)
+void lcd_clear(int color)
 {
-    unsigned npixels = lcd_width * lcd_height;
-    uint16_t image[npixels];
+    lcd_fill(color, 0, 0, lcd_width - 1, lcd_height - 1);
+}
+
+//
+// Fill rectangle.
+//
+void lcd_fill(int color, int x0, int y0, int x1, int y1)
+{
+    unsigned npixels = x1 + 1 - x0;
+    uint16_t data[npixels];
     int j;
 
     color = ((uint8_t)color << 8) | (uint8_t)(color >> 8);
 
     for (j = 0; j < npixels; j++) {
-        image[j] = color;
+        data[j] = color;
     }
 
-    lcd_set_window(0, 0, lcd_width - 1, lcd_height - 1);
+    lcd_set_window(x0, y0, x1, y1);
     gpio_write(PIN_LCD_DC, 1);
-    for (j = 0; j < lcd_height; j++) {
-        spi_bulk_rw((uint8_t*) &image[j * lcd_width], lcd_width * 2);
+    for (j = y0; j <= y1; j++) {
+        spi_bulk_write((uint8_t*) &data[0], npixels * 2);
     }
 }
 
@@ -290,4 +298,59 @@ void lcd_close()
     // Restore U2RX, U2TX pins.
     gpio_set_mode(GPIO_PIN('G', 9), MODE_U2TX);
     gpio_set_mode(GPIO_PIN('B', 0), MODE_U2RX);
+}
+
+/*
+ * Draw a line.
+ */
+void lcd_line(int color, int x0, int y0, int x1, int y1)
+{
+    int dx, dy, stepx, stepy, fraction;
+
+    if (x0 == x1 || y0 == y1) {
+        lcd_fill(color, x0, y0, x1, y1);
+        return;
+    }
+
+    /* Use Bresenham's line algorithm. */
+    dy = y1 - y0;
+    if (dy < 0) {
+        dy = -dy;
+        stepy = -1;
+    } else {
+        stepy = 1;
+    }
+    dx = x1 - x0;
+    if (dx < 0) {
+        dx = -dx;
+        stepx = -1;
+    } else {
+        stepx = 1;
+    }
+    dy <<= 1;                           /* dy is now 2*dy */
+    dx <<= 1;                           /* dx is now 2*dx */
+    lcd_pixel(color, x0, y0);
+    if (dx > dy) {
+        fraction = dy - (dx >> 1);      /* same as 2*dy - dx */
+        while (x0 != x1) {
+            if (fraction >= 0) {
+                y0 += stepy;
+                fraction -= dx;         /* same as fraction -= 2*dx */
+            }
+            x0 += stepx;
+            fraction += dy;             /* same as fraction -= 2*dy */
+            lcd_pixel(color, x0, y0);
+        }
+    } else {
+        fraction = dx - (dy >> 1);
+        while (y0 != y1) {
+            if (fraction >= 0) {
+                x0 += stepx;
+                fraction -= dy;
+            }
+            y0 += stepy;
+            fraction += dx;
+            lcd_pixel(color, x0, y0);
+        }
+    }
 }
