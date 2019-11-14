@@ -71,3 +71,5 @@ void lcd_image(int x, int y, int width, int height, const unsigned short *data);
 void lcd_char(const struct lcd_font_t *font, int color, int background, int x, int y, int sym);
 void lcd_text(const struct lcd_font_t *font, int color, int background, int x, int y, const char *text);
 int lcd_text_width(const struct lcd_font_t *font, const char *text, int nchars);
+
+int lcd_get_key_press(void);
