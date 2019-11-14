@@ -1,5 +1,5 @@
 /*
- * Draw random pixels.
+ * Draw random filled rectangles.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,7 +25,7 @@ int main()
     signal(SIGINT, finish);
 
     // Initialize the display
-    printf("Draw random pixels.\n");
+    printf("Draw random filled rectangles.\n");
     lcd_init(0, 0, &xsize, &ysize);
     printf("Screen size %u x %u.\n", xsize, ysize);
 
@@ -33,12 +33,14 @@ int main()
     printf("Press ^C to stop.\n");
 
     for (;;) {
-        int x = rand() % xsize;
-        int y = rand() % ysize;
+        int x0 = rand() % xsize;
+        int y0 = rand() % ysize;
+        int x1 = rand() % xsize;
+        int y1 = rand() % ysize;
         int color = rand() << 1;
 
-        // Draw random pixels.
-        lcd_pixel(color, x, y);
+        // Draw random rectangles.
+        lcd_fill(color, x0, y0, x1, y1);
     }
     return 0;
 }

@@ -25,11 +25,11 @@ int main()
     signal(SIGINT, finish);
 
     // Initialize the display
+    printf("Draw random lines.\n");
     lcd_init(0, 0, &xsize, &ysize);
     printf("Screen size %u x %u.\n", xsize, ysize);
 
     srand(time(0));
-    printf("Draw random lines.\n");
     printf("Press ^C to stop.\n");
 
     for (;;) {
