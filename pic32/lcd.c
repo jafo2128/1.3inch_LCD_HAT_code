@@ -54,6 +54,11 @@
 static int lcd_width, lcd_height;
 
 //
+// Cursor position for text output.
+//
+static int _col, _row;
+
+//
 // Hardware reset
 //
 static void lcd_reset()
@@ -418,5 +423,131 @@ void lcd_circle(int color, int x0, int y0, int radius)
         lcd_pixel(color, x0 - y, y0 + x);
         lcd_pixel(color, x0 + y, y0 - x);
         lcd_pixel(color, x0 - y, y0 - x);
+    }
+}
+
+//
+// Draw a glyph of one symbol.
+//
+static void lcd_glyph(const struct lcd_font_t *font,
+    int color, int background, int x, int y, int width,
+    const unsigned short *bits)
+{
+    int h, w, c;
+    unsigned bitmask = 0;
+
+    if (x + width > lcd_width || y + font->height > lcd_height)
+        return;
+
+    if (background >= 0) {
+        //
+        // Clear background.
+        //
+        lcd_set_window(x, y, x + width - 1, y + font->height - 1);
+
+        // Loop on each glyph row.
+        for (h=0; h<font->height; h++) {
+            // Loop on every pixel in the row (left to right).
+            for (w=0; w<width; w++) {
+                if ((w & 15) == 0)
+                    bitmask = *bits++;
+                else
+                    bitmask <<= 1;
+
+                c = (bitmask & 0x8000) ? color : background;
+                lcd_send_data(c >> 8);
+                lcd_send_data(c);
+            }
+        }
+    } else {
+        //
+        // Transparent background.
+        //
+        // Loop on each glyph row.
+        for (h=0; h<font->height; h++) {
+            // Loop on every pixel in the row (left to right).
+            for (w=0; w<width; w++) {
+                if ((w & 15) == 0)
+                    bitmask = *bits++;
+                else
+                    bitmask <<= 1;
+
+                if (bitmask & 0x8000)
+                    lcd_pixel(color, x + w, y + h);
+            }
+        }
+    }
+}
+
+//
+// Draw a character from a specified font.
+//
+void lcd_char(const struct lcd_font_t *font,
+    int color, int background, int x, int y, int sym)
+{
+    unsigned cindex, width;
+    const unsigned short *bits;
+
+    if (x >= 0)
+        _col = x;
+    if (y >= 0)
+        _row = y;
+    switch (sym) {
+    case '\n':      // goto next line
+        _row += font->height;
+        _col = 0;
+        if (_row > lcd_height - font->height)
+            _row = 0;
+        return;
+    case '\r':      // carriage return - go to begin of line
+        _col = 0;
+        return;
+    case '\t':      // tab replaced by space
+        sym = ' ';
+        break;
+    }
+
+    if (sym < font->firstchar || sym >= font->firstchar + font->size)
+        sym = font->defaultchar;
+    cindex = sym - font->firstchar;
+
+    // Get font bitmap depending on fixed pitch or not.
+    if (font->width) {
+        // Proportional font.
+        width = font->width[cindex];
+    } else {
+        // Fixed width font.
+        width = font->maxwidth;
+    }
+    if (font->offset) {
+        bits = font->bits + font->offset[cindex];
+    } else {
+        bits = font->bits + cindex * font->height;
+    }
+
+    // Draw a character.
+    lcd_glyph(font, color, background, _col, _row, width, bits);
+    _col += width;
+}
+
+//
+// Draw a string of characters.
+// TODO: Decode UTF-8.
+//
+void lcd_text(const struct lcd_font_t *font,
+    int color, int background, int x, int y, const char *text)
+{
+    int sym;
+
+    if (x >= 0)
+        _col = x;
+    if (y >= 0)
+        _row = y;
+    for (;;) {
+        sym = *text++;
+        if (! sym)
+            break;
+
+        lcd_char(font, color, background, -1, -1, sym);
     }
 }

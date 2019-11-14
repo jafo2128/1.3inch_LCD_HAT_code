@@ -1,8 +1,11 @@
 CC      = gcc
-CFLAGS  = -g -O2 -Wall -Werror
+CFLAGS  = -g -O -Wall -Werror -I.
 
-TARGET  = demo-pixel demo-line demo-rect demo-fill demo-circle demo-color
+TARGET  = demo-pixel demo-line demo-rect demo-fill demo-circle demo-color \
+          demo-font
 OBJ     = gpio.o spi.o alt.o lcd.o
+FONTS   = 5x7.o 6x9.o digits20.o digits32.o lucidasans11.o lucidasans15.o \
+          lucidasans28.o lucidasans7.o lucidasans9.o verdana7.o
 
 all:    $(TARGET)
 
@@ -26,14 +29,59 @@ demo-circle: demo-circle.o $(OBJ)
 
 demo-color: demo-color.o $(OBJ)
 	$(CC) $(LDFLAGS) demo-color.o $(OBJ) -o $@
+
+demo-font: demo-font.o $(OBJ) $(FONTS)
+	$(CC) $(LDFLAGS) demo-font.o $(OBJ) $(FONTS) -o $@
+
+5x7.o:  fonts/5x7.c
+	$(CC) $(CFLAGS) -o $@ -c $?
+
+6x9.o:  fonts/6x9.c
+	$(CC) $(CFLAGS) -o $@ -c $?
+
+digits20.o: fonts/digits20.c
+	$(CC) $(CFLAGS) -o $@ -c $?
+
+digits32.o: fonts/digits32.c
+	$(CC) $(CFLAGS) -o $@ -c $?
+
+lucidasans11.o: fonts/lucidasans11.c
+	$(CC) $(CFLAGS) -o $@ -c $?
+
+lucidasans15.o: fonts/lucidasans15.c
+	$(CC) $(CFLAGS) -o $@ -c $?
+
+lucidasans28.o: fonts/lucidasans28.c
+	$(CC) $(CFLAGS) -o $@ -c $?
+
+lucidasans7.o: fonts/lucidasans7.c
+	$(CC) $(CFLAGS) -o $@ -c $?
+
+lucidasans9.o: fonts/lucidasans9.c
+	$(CC) $(CFLAGS) -o $@ -c $?
+
+verdana7.o: fonts/verdana7.c
+	$(CC) $(CFLAGS) -o $@ -c $?
 ###
 alt.o: alt.c gpio.h
+demo-circle.o: demo-circle.c lcd.h
+demo-color.o: demo-color.c lcd.h
+demo-fill.o: demo-fill.c lcd.h
+demo-font.o: demo-font.c lcd.h
 demo-line.o: demo-line.c lcd.h
 demo-pixel.o: demo-pixel.c lcd.h
 demo-rect.o: demo-rect.c lcd.h
-demo-fill.o: demo-fill.c lcd.h
-demo-circle.o: demo-circle.c lcd.h
-demo-color.o: demo-color.c lcd.h
 gpio.o: gpio.c gpio.h
 lcd.o: lcd.c lcd.h gpio.h spi.h
 spi.o: spi.c spi.h
+5x7.o: fonts/5x7.c lcd.h
+6x9.o: fonts/6x9.c lcd.h
+convbdf.o: fonts/convbdf.c
+digits20.o: fonts/digits20.c lcd.h
+digits32.o: fonts/digits32.c lcd.h
+lucidasans11.o: fonts/lucidasans11.c lcd.h
+lucidasans15.o: fonts/lucidasans15.c lcd.h
+lucidasans28.o: fonts/lucidasans28.c lcd.h
+lucidasans7.o: fonts/lucidasans7.c lcd.h
+lucidasans9.o: fonts/lucidasans9.c lcd.h
+verdana7.o: fonts/verdana7.c lcd.h
