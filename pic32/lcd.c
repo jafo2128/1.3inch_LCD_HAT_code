@@ -51,48 +51,7 @@
 #define PIN_KEY2        GPIO_PIN('H', 12)   // p20 - RH12 - j38
 #define PIN_KEY3        GPIO_PIN('B', 15)   // p16 - RB15 - j36
 
-//
-// Initialize the pins and SPI protocol.
-//
-void lcd_init()
-{
-    // Re-map U2RX pin from p19 to p3, temporarily.
-    gpio_set_mode(GPIO_PIN('F', 8), MODE_U2RX);
-
-    // Output pins.
-    gpio_set_mode(PIN_LCD_CS,  MODE_OUTPUT);
-    gpio_set_mode(PIN_LCD_RST, MODE_OUTPUT);
-    gpio_set_mode(PIN_LCD_DC,  MODE_OUTPUT);
-    gpio_set_mode(PIN_LCD_BL,  MODE_OUTPUT);
-    gpio_write(PIN_LCD_CS, 1);
-
-    // Input pins.
-    gpio_set_mode(PIN_KEY_UP,    MODE_INPUT);
-    gpio_set_mode(PIN_KEY_DOWN,  MODE_INPUT);
-    gpio_set_mode(PIN_KEY_LEFT,  MODE_INPUT);
-    gpio_set_mode(PIN_KEY_RIGHT, MODE_INPUT);
-    gpio_set_mode(PIN_KEY_PRESS, MODE_INPUT);
-    gpio_set_mode(PIN_KEY1,      MODE_INPUT);
-    gpio_set_mode(PIN_KEY2,      MODE_INPUT);
-    gpio_set_mode(PIN_KEY3,      MODE_INPUT);
-
-    //
-    // Open the SPI port.
-    //
-    spi_init("/dev/spidev2.0", 20000000);
-}
-
-//
-// Close the display.
-//
-void lcd_close()
-{
-    spi_close();
-
-    // Restore U2RX, U2TX pins.
-    gpio_set_mode(GPIO_PIN('G', 9), MODE_U2TX);
-    gpio_set_mode(GPIO_PIN('B', 0), MODE_U2RX);
-}
+static int lcd_width, lcd_height;
 
 //
 // Hardware reset
@@ -130,7 +89,7 @@ static int lcd_send_data(uint8_t data)
 //
 // Initialize the display.
 //
-void lcd_start(int horiz_flag)
+void lcd_start_st7789(int vertical_flag)
 {
     // Turn on the backlight
     gpio_write(PIN_LCD_BL, 1);
@@ -140,10 +99,10 @@ void lcd_start(int horiz_flag)
 
     // Set the resolution and scanning method of the screen
     lcd_send_command(0x36);          // MX, MY, RGB mode
-    if (horiz_flag) {
-        lcd_send_data(0x70);
-    } else {
+    if (vertical_flag) {
         lcd_send_data(0x00);
+    } else {
+        lcd_send_data(0x70);
     }
 
     // Initialize the LCD registers
@@ -240,22 +199,95 @@ static void lcd_set_window(uint16_t x_start, uint16_t y_start, uint16_t x_end, u
 }
 
 //
+// Paint a pixel.
+//
+void lcd_pixel(int color, int x, int y)
+{
+    if (x < 0 || x >= lcd_width || y < 0 || y >= lcd_height)
+        return;
+
+    lcd_set_window(x, y, x, y);
+    lcd_send_data((uint8_t) (color >> 8));
+    lcd_send_data((uint8_t) color);
+}
+
+//
 // Clear screen
 //
-void lcd_clear(unsigned width, unsigned height, unsigned color)
+void lcd_clear(unsigned color)
 {
-    uint16_t image[width*height];
+    unsigned npixels = lcd_width * lcd_height;
+    uint16_t image[npixels];
     int j;
 
     color = ((uint8_t)color << 8) | (uint8_t)(color >> 8);
 
-    for (j = 0; j < height*width; j++) {
+    for (j = 0; j < npixels; j++) {
         image[j] = color;
     }
 
-    lcd_set_window(0, 0, width-1, height-1);
+    lcd_set_window(0, 0, lcd_width - 1, lcd_height - 1);
     gpio_write(PIN_LCD_DC, 1);
-    for (j = 0; j < height; j++){
-        spi_bulk_rw((uint8_t*) &image[j*width], width*2);
+    for (j = 0; j < lcd_height; j++) {
+        spi_bulk_rw((uint8_t*) &image[j * lcd_width], lcd_width * 2);
     }
+}
+
+//
+// Initialize the pins.
+//
+static void lcd_setup_gpio_spi()
+{
+    // Re-map U2RX pin from p19 to p3, temporarily.
+    gpio_set_mode(GPIO_PIN('F', 8), MODE_U2RX);
+
+    // Output pins.
+    gpio_set_mode(PIN_LCD_CS,  MODE_OUTPUT);
+    gpio_set_mode(PIN_LCD_RST, MODE_OUTPUT);
+    gpio_set_mode(PIN_LCD_DC,  MODE_OUTPUT);
+    gpio_set_mode(PIN_LCD_BL,  MODE_OUTPUT);
+    gpio_write(PIN_LCD_CS, 1);
+
+    // Input pins.
+    gpio_set_mode(PIN_KEY_UP,    MODE_INPUT);
+    gpio_set_mode(PIN_KEY_DOWN,  MODE_INPUT);
+    gpio_set_mode(PIN_KEY_LEFT,  MODE_INPUT);
+    gpio_set_mode(PIN_KEY_RIGHT, MODE_INPUT);
+    gpio_set_mode(PIN_KEY_PRESS, MODE_INPUT);
+    gpio_set_mode(PIN_KEY1,      MODE_INPUT);
+    gpio_set_mode(PIN_KEY2,      MODE_INPUT);
+    gpio_set_mode(PIN_KEY3,      MODE_INPUT);
+
+    //
+    // Open the SPI port.
+    //
+    spi_init("/dev/spidev2.0", 20000000);
+}
+
+//
+// Initialize the display.
+//
+void lcd_init(int rotate, int color, int *xsize, int *ysize)
+{
+    lcd_width = 240;
+    lcd_height = 240;
+
+    lcd_setup_gpio_spi();
+    lcd_start_st7789(rotate);
+    lcd_clear(color);
+
+    *xsize = lcd_width;
+    *ysize = lcd_height;
+}
+
+//
+// Close the display.
+//
+void lcd_close()
+{
+    spi_close();
+
+    // Restore U2RX, U2TX pins.
+    gpio_set_mode(GPIO_PIN('G', 9), MODE_U2TX);
+    gpio_set_mode(GPIO_PIN('B', 0), MODE_U2RX);
 }

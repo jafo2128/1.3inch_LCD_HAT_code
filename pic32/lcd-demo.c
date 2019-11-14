@@ -6,7 +6,6 @@ int main()
 {
     // Initialize the display
     lcd_init();
-    printf("SPI demo: clear LCD display.\n");
 
     // Horizontal orientation.
     lcd_start(1);
