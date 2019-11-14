@@ -224,6 +224,26 @@ void lcd_clear(int color)
 //
 void lcd_fill(int color, int x0, int y0, int x1, int y1)
 {
+    if (x0 < 0) x0 = 0;
+    if (y0 < 0) x0 = 0;
+    if (x1 < 0) x1 = 0;
+    if (y1 < 0) x1 = 0;
+    if (x0 >= lcd_width) x0 = lcd_width-1;
+    if (x1 >= lcd_width) x1 = lcd_width-1;
+    if (y0 >= lcd_height) y0 = lcd_height-1;
+    if (y1 >= lcd_height) y1 = lcd_height-1;
+
+    if (x1 < x0) {
+        int t = x0;
+        x0 = x1;
+        x1 = t;
+    }
+    if (y1 < y0) {
+        int t = y0;
+        y0 = y1;
+        y1 = t;
+    }
+
     unsigned npixels = x1 + 1 - x0;
     uint16_t data[npixels];
     int j;
@@ -300,9 +320,9 @@ void lcd_close()
     gpio_set_mode(GPIO_PIN('B', 0), MODE_U2RX);
 }
 
-/*
- * Draw a line.
- */
+//
+// Draw a line.
+//
 void lcd_line(int color, int x0, int y0, int x1, int y1)
 {
     int dx, dy, stepx, stepy, fraction;
@@ -312,7 +332,7 @@ void lcd_line(int color, int x0, int y0, int x1, int y1)
         return;
     }
 
-    /* Use Bresenham's line algorithm. */
+    // Use Bresenham's line algorithm.
     dy = y1 - y0;
     if (dy < 0) {
         dy = -dy;
@@ -327,18 +347,18 @@ void lcd_line(int color, int x0, int y0, int x1, int y1)
     } else {
         stepx = 1;
     }
-    dy <<= 1;                           /* dy is now 2*dy */
-    dx <<= 1;                           /* dx is now 2*dx */
+    dy <<= 1;                           // dy is now 2*dy
+    dx <<= 1;                           // dx is now 2*dx
     lcd_pixel(color, x0, y0);
     if (dx > dy) {
-        fraction = dy - (dx >> 1);      /* same as 2*dy - dx */
+        fraction = dy - (dx >> 1);      // same as 2*dy - dx
         while (x0 != x1) {
             if (fraction >= 0) {
                 y0 += stepy;
-                fraction -= dx;         /* same as fraction -= 2*dx */
+                fraction -= dx;         // same as fraction -= 2*dx
             }
             x0 += stepx;
-            fraction += dy;             /* same as fraction -= 2*dy */
+            fraction += dy;             // same as fraction -= 2*dy
             lcd_pixel(color, x0, y0);
         }
     } else {
@@ -353,4 +373,15 @@ void lcd_line(int color, int x0, int y0, int x1, int y1)
             lcd_pixel(color, x0, y0);
         }
     }
+}
+
+//
+// Draw a rectangular frame.
+//
+void lcd_rect(int color, int x0, int y0, int x1, int y1)
+{
+    lcd_fill(color, x0, y0, x1, y0);
+    lcd_fill(color, x0, y1, x1, y1);
+    lcd_fill(color, x0, y0, x0, y1);
+    lcd_fill(color, x1, y0, x1, y1);
 }
