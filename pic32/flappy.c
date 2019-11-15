@@ -35,6 +35,7 @@
 extern const struct lcd_font_t font_lucidasans15;
 extern const struct lcd_font_t font_lucidasans28;
 
+int xsize, ysize;
 int wing;
 int fx, fy, fall_rate;
 int pillar_pos, gap_pos;
@@ -57,7 +58,7 @@ void fill(int color, int x, int y, int w, int h)
 
 void draw_pillar(int x, int gap)
 {
-    if (x >= 320)
+    if (x >= xsize)
         return;
 
     fill(GREEN, x+2, 2,      46, gap-4);
@@ -71,7 +72,7 @@ void draw_pillar(int x, int gap)
 
 void clear_pillar(int x, int gap)
 {
-    if (x >= 320)
+    if (x >= xsize)
         return;
 
     /* "Cheat" slightly and just clear the right hand pixels
@@ -193,7 +194,7 @@ void start_game()
     fx = 50;
     fy = 125;
     fall_rate = -1;
-    pillar_pos = 320;
+    pillar_pos = xsize;
     gap_pos = 60;
     crashed = 0;
     score = 0;
@@ -237,7 +238,7 @@ void draw_loop()
             score++;
         }
         else if (pillar_pos < -50) {
-            pillar_pos = 320;
+            pillar_pos = xsize;
             gap_pos = 20 + random() % 100;
         }
     }
@@ -369,8 +370,6 @@ void finish(int sig)
 
 int main()
 {
-    int xsize, ysize;
-
     // Handle Ctrl+C.
     signal(SIGINT, finish);
 
@@ -400,8 +399,8 @@ int main()
             }
             else if (!running) {
                 /* Clear text & start scrolling. */
-                lcd_fill(BLUE, 0, 0, 320-1, 100);
-                lcd_fill(BLUE, 0, 180, 320-1, 205);
+                lcd_fill(BLUE, 0, 0, xsize-1, 100);
+                lcd_fill(BLUE, 0, 180, xsize-1, 205);
                 running = 1;
             } else {
                 /* Fly up. */

@@ -4,8 +4,8 @@ CFLAGS  = -g -O -Wall -Werror -I.
 TARGET  = demo-pixel demo-line demo-rect demo-fill demo-circle demo-color \
           demo-font demo-speed flappy
 OBJ     = gpio.o spi.o alt.o lcd.o
-FONTS   = 5x7.o 6x9.o digits20.o digits32.o lucidasans11.o lucidasans15.o \
-          lucidasans28.o lucidasans7.o lucidasans9.o verdana7.o
+FONTS   = digits20.o digits32.o lucidasans11.o lucidasans15.o \
+          lucidasans28.o
 
 all:    $(TARGET)
 
@@ -39,12 +39,6 @@ demo-speed: demo-speed.o $(OBJ) lucidasans15.o
 flappy: flappy.o $(OBJ) lucidasans15.o lucidasans28.o
 	$(CC) $(LDFLAGS) flappy.o $(OBJ) lucidasans15.o lucidasans28.o -o $@
 
-5x7.o:  fonts/5x7.c
-	$(CC) $(CFLAGS) -o $@ -c $<
-
-6x9.o:  fonts/6x9.c
-	$(CC) $(CFLAGS) -o $@ -c $<
-
 digits20.o: fonts/digits20.c
 	$(CC) $(CFLAGS) -o $@ -c $<
 
@@ -60,14 +54,6 @@ lucidasans15.o: fonts/lucidasans15.c
 lucidasans28.o: fonts/lucidasans28.c
 	$(CC) $(CFLAGS) -o $@ -c $<
 
-lucidasans7.o: fonts/lucidasans7.c
-	$(CC) $(CFLAGS) -o $@ -c $<
-
-lucidasans9.o: fonts/lucidasans9.c
-	$(CC) $(CFLAGS) -o $@ -c $<
-
-verdana7.o: fonts/verdana7.c
-	$(CC) $(CFLAGS) -o $@ -c $<
 ###
 alt.o: alt.c gpio.h
 demo-circle.o: demo-circle.c lcd.h

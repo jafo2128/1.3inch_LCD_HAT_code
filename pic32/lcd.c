@@ -253,7 +253,7 @@ void lcd_fill(int color, int x0, int y0, int x1, int y1)
     uint16_t data[npixels];
     int j;
 
-    color = ((uint8_t)color << 8) | (uint8_t)(color >> 8);
+    color = htobe16(color);
 
     for (j = 0; j < npixels; j++) {
         data[j] = color;
@@ -449,9 +449,12 @@ static void lcd_glyph(const struct lcd_font_t *font,
 
     if (background >= 0) {
         //
-        // Clear background.
+        // Update background.
         //
-        lcd_set_window(x, y, x + width - 1, y + font->height - 1);
+        int npixels = width * font->height;
+        uint16_t image[npixels];
+        int color_be = htobe16(color);
+        int background_be = htobe16(background);
 
         // Loop on each glyph row.
         for (h=0; h<font->height; h++) {
@@ -462,11 +465,14 @@ static void lcd_glyph(const struct lcd_font_t *font,
                 else
                     bitmask <<= 1;
 
-                c = (bitmask & 0x8000) ? color : background;
-                lcd_send_data(c >> 8);
-                lcd_send_data(c);
+                c = (bitmask & 0x8000) ? color_be : background_be;
+                image[w + h*width] = c;
             }
         }
+
+        lcd_set_window(x, y, x + width - 1, y + font->height - 1);
+        gpio_write(PIN_LCD_DC, 1);
+        spi_bulk_write((uint8_t*) &image[0], npixels * 2);
     } else {
         //
         // Transparent background.

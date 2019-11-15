@@ -13,11 +13,6 @@
 extern const struct lcd_font_t font_lucidasans28;
 extern const struct lcd_font_t font_lucidasans15;
 extern const struct lcd_font_t font_lucidasans11;
-extern const struct lcd_font_t font_lucidasans9;
-extern const struct lcd_font_t font_lucidasans7;
-extern const struct lcd_font_t font_verdana7;
-extern const struct lcd_font_t font_6x9;
-extern const struct lcd_font_t font_5x7;
 extern const struct lcd_font_t font_digits32;
 extern const struct lcd_font_t font_digits20;
 
@@ -96,11 +91,6 @@ int main()
         show(&font_lucidasans28, "Lucida Sans 28", 0);
         show(&font_lucidasans15, "Lucida Sans 15", 0);
         show(&font_lucidasans11, "Lucida Sans 11", 0);
-        show(&font_lucidasans9, "Lucida Sans 9", 0);
-        show(&font_lucidasans7, "Lucida Sans 7", 0);
-        show(&font_verdana7, "Verdana 7", 0);
-        show(&font_6x9, "Fixed 6x9", 0);
-        show(&font_5x7, "Fixed 5x7", 0);
         show(&font_digits32, "Digits 32", 1);
         show(&font_digits20, "Digits 20", 1);
     }
